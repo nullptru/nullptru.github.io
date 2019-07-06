@@ -96,7 +96,7 @@ busuanzi_slug: 'PV: ${count} :)'
 # Baidu analytics
 baidu_analytics: 
 # Google analytics
-google_analytics: 
+google_analytics: UA-139204686-1
 # CNZZ analytics
 CNZZ_analytics: 
 
