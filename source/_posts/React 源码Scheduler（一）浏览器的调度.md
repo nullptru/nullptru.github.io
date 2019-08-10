@@ -9,6 +9,10 @@ tags:
 
 [欢迎大家交流和探讨](https://geasscn.com)
 
++ React 源码 Scheduler（一）浏览器的调度
++ [React 源码 Scheduler (二) React 的调度流程](https://geasscn.com/2019/07/13/React%20%E6%BA%90%E7%A0%81Scheduler%EF%BC%88%E4%BA%8C%EF%BC%89React%E7%9A%84%E8%B0%83%E5%BA%A6%E6%B5%81%E7%A8%8B/)
++ [React 源码 Scheduler (三) React 的调度算法实现](https://geasscn.com/2019/07/21/React%E6%BA%90%E7%A0%81Scheduler%EF%BC%88%E4%B8%89%EF%BC%89React%E7%9A%84%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0/)
+
 ### 背景
 
 `Schedule` 即任务的调度，我们知道 JavaScript 是单线程运行的。因此，浏览器无法同时相应 JS 任务与用户的 UI 操作，如此在执行 UI 操作的时候，便会带给用户一定卡顿感，也就是我们所谓的「丢帧」。
@@ -108,4 +112,4 @@ output:
 ```
 第二个版本的代码，我们通过 `idleDeadline.timeRemaining()` 获取当前剩余时间进行任务的调度。在复杂情况下，会出现浏览器空闲时间过少导致任务堆积问题，这时候第二个参数的 `timeout` 配置就派上用场了。有兴趣的小伙伴可以自己试试。
 
-在 React 中的任务调度，也采用了 `requestIdleCallback` 实现调度，但由于[该 API 的兼容性问题](https://www.caniuse.com/#search=requestIdleCallback)（Safari 这个新生代的 IE），FB 内部自己基于 `requestAnimationFrame` 实现了一个 `requestIdleCallback` 的 polyfill。我们将在下一节中进行介绍（如果还有的话）。
+在 React 中的任务调度，也采用了 `requestIdleCallback` 实现调度，但由于[该 API 的兼容性问题](https://www.caniuse.com/#search=requestIdleCallback)（Safari 这个新生代的 IE），React 内部自己基于 `requestAnimationFrame` 实现了一个 `requestIdleCallback` 的 polyfill。我们将在下一篇中进行介绍。

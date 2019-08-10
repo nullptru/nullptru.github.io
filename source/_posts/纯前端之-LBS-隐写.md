@@ -32,7 +32,7 @@ LBS 全称为 least significant bit(最低有效位)。我们都知道，一个�
 所谓置数据为最低有效位，实际上二进制最后一位为 1，则十进制为奇数，为 0，则十进制为偶数，因此可以翻译为。当写入数据为 1，
 像素值为奇数，写入为 0，像素值为偶数。
 
-```
+```javascript
 // t 为二进制数据
 // r 为像素p的r通道数值
 // rr 为加密后像素p的r通道值
@@ -61,7 +61,7 @@ r = rr % 2
 > encodeURICompoent 可用来编码任意字符串  
 > encodeURI 是设计用来编码 URI 的，因此对于 https:\\中的':\\'这类字符并不进行编码。
 
-```
+```javascript
 // 进行位数补全
 const padNumber = (num, fill) => {
   var len = ('' + num).length;
@@ -100,7 +100,7 @@ const decodeUtf8 = (bytes) => {
 
 在 H5 的 Canvas API 出现后，前端对于图片的处理就变得十分方便了。话不多说，直接上代码。
 
-```
+```javascript
 const image = new Image();
 image.src = 'xxx.png';
 image.onload = () => { // 要在图片onload函数内进行逻辑操作，确保图片加载
