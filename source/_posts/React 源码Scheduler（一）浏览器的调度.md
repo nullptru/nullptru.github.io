@@ -2,7 +2,9 @@
 title: React 源码 Scheduler（一）浏览器的调度
 date: 2019-07-06 22:01:08
 tags:
-  - React
+	- React
+categories:
+	- 技术文档
 ---
 
 本文源码基于 `React 16.8.6 (March 27, 2019)`，仅记录一些个人阅读源码的分享与体会。

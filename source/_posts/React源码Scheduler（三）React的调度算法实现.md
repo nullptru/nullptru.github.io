@@ -2,6 +2,8 @@
 title: React源码Scheduler（三）React的调度算法实现
 date: 2019-07-21 17:57:19
 tags: React
+categories:
+	- 技术文档
 ---
 本文源码基于 `React 16.8.6 (March 27, 2019)`，仅记录一些个人阅读源码的分享与体会。
 

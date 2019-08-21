@@ -2,6 +2,10 @@
 title: Trie 树与不可变数据结构
 date: 2019-07-05 23:07:24
 tags:
+  - 前端
+  - 数据结构
+categories:
+	- 技术文档
 ---
 
 > 本文首发于[知乎专栏：饿了么前端](https://zhuanlan.zhihu.com/p/63207283)

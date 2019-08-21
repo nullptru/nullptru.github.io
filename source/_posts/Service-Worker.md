@@ -4,6 +4,8 @@ date: 2018-06-14 23:31:24
 tags: 
   - 前端
   - JavaScript
+categories:
+	- 技术文档
 ---
 
 要了解Service Worker相关知识，需要对于Web Worker有一定基础的了解。

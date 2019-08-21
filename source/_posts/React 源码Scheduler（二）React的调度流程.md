@@ -2,6 +2,8 @@
 title: React 源码Scheduler（二）React的调度流程
 date: 2019-07-13 14:53:24
 tags: React
+categories:
+	- 技术文档
 ---
 
 本文源码基于 `React 16.8.6 (March 27, 2019)`，仅记录一些个人阅读源码的分享与体会。

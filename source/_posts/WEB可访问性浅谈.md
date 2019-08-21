@@ -2,6 +2,8 @@
 title: Web 可访问性浅谈
 date: 2019-08-10 12:26:09
 tags: 前端
+categories:
+	- 技术文档
 ---
 
 最近，在处理一个 [ElementUI](https://github.com/ElemeFE/element) 的 PR 时，有幸接触到关于可访问性的知识。在学习之余，也将之记录下来作为沉淀。
