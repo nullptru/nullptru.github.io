@@ -1,7 +1,9 @@
 ---
 title: React 源码Scheduler（二）React的调度流程
 date: 2019-07-13 14:53:24
-tags: React
+tags: 
+  - React
+  - 源码解析
 categories:
 	- 技术文档
 ---

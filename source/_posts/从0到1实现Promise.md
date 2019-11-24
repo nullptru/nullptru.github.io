@@ -2,7 +2,10 @@
 title: 从0到1实现Promise
 date: 2019-11-24 15:43:46
 tags:
+  - 前端
+  - 规范
 categories:
+	- 技术文档
 ---
 ## Promise 是什么
 
