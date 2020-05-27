@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta name="generator" content="Hexo 3.9.0"><link rel="manifest" href="/manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="./vue-image-previewer.min.js"></script>
+  <title>Vue Image Previewer Example</title>
+</head>
+<body>
+  <div style="display: flex; align-items: center;justify-content:center;flex-direction: column; height: 100vh">
+    <div style="font-weight: bold; font-size: 20px;margin: 20px;">Vue Image Previewer</div>
+    <div id="app"></div>
+  </div>
+  
+  <script>
+    new Vue({
+      el: '#app',
+      components: { VuePreviewer: window.VuePreviewer },
+      data() {
+        return {
+          options: {defaultWidth: '24%', defaultHeight: '100px'},
+          style: {
+            width: '50%',
+          },
+          imgs: [
+            'https://img.pc841.com/2018/0905/20180905031728569.jpg',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJQQM7xWSl3uRGecETNjaLl8_2wmAvlGpwyzX_Xs3RyZoTsM_j',
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCvAUO5V2u773yOF64FTxFkUVcx_uNMAYUcdxoD4pFwYshUCWq",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRK-ltn2blQ6FVdofq99CqGk37i0g8rIAqdKZnrE0BpwoHfCwkc"
+          ]
+        }
+      },
+      template: `
+        <vue-previewer :style="style" :images="imgs" mode="image" :options="options">
+          <template v-slot:footer="{image}">{{image.name}}</template>
+        </vue-previewer>`
+    })
+  </script>
+<script>if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js?t=1590587668242')
+    .then(function () {console.log('ServiceWorker Register Successfully.')})
+    .catch(function (e) {console.error(e)});
+}
+</script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-20},"mobile":{"show":false},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>

@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+<head><link rel=manifest href=/manifest.json><meta name="generator" content="Hexo 3.9.0"><link rel="manifest" href="/manifest.json">
+    <meta charset="utf-8">
+    <meta name="google-site-verification" content="cZXxPh_zIQVh7W3rVoHr-GAX0S9spUQxoIT0rEbKfrA">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="戯れ言">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="戯れ言">
+    
+    <meta name="keywords" content="Geass,hexo-theme,Geass-blog">
+    
+    <meta name="description" content="Another front-end developer">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>漫谈组件复用 · Geass&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-139204686-1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-139204686-1');
+    </script>
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Geass&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">漫谈组件复用</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Geass's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            漫谈组件复用
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "前端">前端</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">2.2k</span>阅读时长: <span class="post-count reading-time">8 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/04/14</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <blockquote>
+<p>本文首发于 <a href="https://zhuanlan.zhihu.com/p/38136388" target="_blank" rel="noopener">知乎专栏：饿了么大前端</a></p>
+</blockquote>
+<p>俗话说「懒是程序员的美德」。在越来越注重前端工程化的今天，「Ctrl+C」、「Ctrl+V」的代码，虽然用起来一时爽，一旦需要修改就如同面临火葬场。如何「懒」出效率，是值得思考的问题。减少代码的拷贝，增加封装复用能力，实现可维护、可复用的代码，无疑是我所认为的「懒」的高级境界。鉴于笔者之前使用 React 偏多，进入饿了么后也逐步使用了不少 Vue 进行开发，所以就借此机会，谈谈在 React 和 Vue 中各种基于组件的复用与实现方式。</p>
+<h3 id="Mixin-混入模式"><a href="#Mixin-混入模式" class="headerlink" title="Mixin 混入模式"></a>Mixin 混入模式</h3><p>最原始的一种复用方式应该就是 Mixin。通过将公用逻辑封装为一个 Mixin，通过注入的方式进行组件间的复用。「ps: 该方式不仅用于组件，也流行于各种 css 预处理器中」。</p>
+<p>在 React 中，通过 React.createClass() 方式创建的组件可使用 Mixin 模式，而在 ES6 的伪类模式下，并不支持 Mixin 模式，官方推荐用组合或者高阶组件方式实现复用，废话不多说，使用方式如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//mixin</span></span><br><span class="line"><span class="keyword">const</span> mixinPart = &#123;</span><br><span class="line">  mixinFunc() &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'this mixin!'</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'this mixin!'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Contacts = React.createClass(&#123;</span><br><span class="line">  mixins: [mixinPart],</span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;div&gt;&#123;<span class="keyword">this</span>.mixinFunc()&#125;&lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">    );</span></span><br><span class="line"><span class="regexp">  &#125;</span></span><br><span class="line"><span class="regexp">&#125;);</span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ =&gt; 'this mixin!';</span></span><br></pre></td></tr></table></figure>
+<p>而在 Vue 中，使用逻辑类似：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//mixin</span></span><br><span class="line"><span class="keyword">const</span> mixinPart = &#123;</span><br><span class="line">  created() &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'this mixin!'</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'this mixin!'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Component = Vue.extend(&#123;</span><br><span class="line">  mixins: [mixinPart]</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">const</span> component = <span class="keyword">new</span> Component(); <span class="comment">// =&gt; "this mixin!"</span></span><br></pre></td></tr></table></figure>
+<p>Mixin 模式给予组件公共抽象与复用能力，但另一方面也具有大量的局限性。由于 Mixin 是侵入式的，因此修改了 Mixin 相当于修改了原组件。其次，在混入过程中，对于相同键值对象与函数的相互覆盖与合并，容易导致各种意外产生。因此使用过程中必须对 Mixin 内部实现有一定了解。强大的灵活性导致了在大型项目中 Mixin 的难维护。</p>
+<h3 id="高阶组件"><a href="#高阶组件" class="headerlink" title="高阶组件"></a>高阶组件</h3><p>高阶组件（High Order Component）这个概念最早是 React 社区提出，借鉴函数式中的高阶函数，提出通过传入一个组件，操作后返回一个新组件的方式进行复用。</p>
+<p>在 React 中的使用非常便捷，官方博客中就有<a href="https://reactjs.org/docs/higher-order-components.html" target="_blank" rel="noopener">相关介绍</a>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> HOC = <span class="function">(<span class="params">WrappedComponent</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> HOC_Component = <span class="function">(<span class="params">props</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;React.Fragment&gt;</span><br><span class="line">        &lt;WrappedComponent &#123;...props&#125; name=<span class="string">"WrappedComponent"</span> /&gt;</span><br><span class="line">        &lt;div&gt;This comes <span class="keyword">from</span> HOC Component&lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">      &lt;/</span>React.Fragment&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;;</span><br><span class="line">  HOC_Component.displayName = <span class="string">'HOC_Component'</span>;</span><br><span class="line">  <span class="keyword">return</span> HOC_Component;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> Component = <span class="function">(<span class="params">props</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span>This message comes from Component: &#123;props.name&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> Result = HOC(Component);</span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">Result</span> /&gt;</span>, document.getElementById('root'));</span></span><br><span class="line"><span class="xml">// =&gt; This message comes from Component: WrappedComponent</span></span><br><span class="line"><span class="xml">// =&gt; This comes from HOC Component</span></span><br></pre></td></tr></table></figure>
+<p>Vue 虽然没有官方示例，但与 React 进行类比，Vue 中的组件最终的展现形式是函数，但在过程中，实际上是一个个对象。因此，Vue 中的高阶组件，应当是传入一个对象，最后传出一个对应对象。我们可以简单实现个上例对应的 HOC 功能：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> HOC = <span class="function">(<span class="params">WrappedComponent</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        components: &#123;</span><br><span class="line">            <span class="string">'wrapped-component'</span>: WrappedComponent</span><br><span class="line">        &#125;,</span><br><span class="line">        template: <span class="string">`</span></span><br><span class="line"><span class="string">          &lt;div&gt;</span></span><br><span class="line"><span class="string">              &lt;wrapped-component name="WrappedComponent" v-bind="$attrs" /&gt;</span></span><br><span class="line"><span class="string">              &lt;div&gt;This comes from HOC Component&lt;/div&gt;</span></span><br><span class="line"><span class="string">            &lt;/div&gt;</span></span><br><span class="line"><span class="string">          `</span></span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> Component = &#123;</span><br><span class="line">    props: [<span class="string">'name'</span>],</span><br><span class="line">    template: <span class="string">'&lt;div&gt;This message comes from Component: &#123;&#123; name &#125;&#125;&lt;/div&gt;'</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">new</span> Vue(HOC(Component)).$mount(<span class="string">'#root'</span>)</span><br><span class="line"><span class="comment">// =&gt; This message comes from Component: WrappedComponent</span></span><br><span class="line"><span class="comment">// =&gt; This comes from HOC Component</span></span><br></pre></td></tr></table></figure>
+<p>高阶组件用途十分广泛，主要可以分为属性代理和反向继承两种。</p>
+<ul>
+<li><p>属性代理具体为高阶组件可以直接获取外部传入的参数，根据需求完成变更后重新传给被包含的组件。如上例中就在原始 props 基础上为 WrappedComponent 增加了一个 name 属性，同时在原始渲染基础上增添了一行信息渲染。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 最基本的反向继承</span></span><br><span class="line"><span class="keyword">const</span> HOC = <span class="function">(<span class="params">WrappedComponent</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="keyword">extends</span> <span class="title">WrappedComponent</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">super</span>.render();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>反向继承因为继承于 WrappedComponent，因而能够获取其 state, render 等各种组件数据，从而做到对组件的渲染和 state 状态等的干预。反向继承虽然在日常使用中遇到情况较少，但无疑是高阶组件中笔者认为的一个闪光点 ( 貌似其它方式中暂时没有可以替代的方案 )。例如，在 Vue 中有着 keep-alive 作为组件缓存，而在 React 中官方暂无类似功能，应用 data =&gt; view 的原则，一个常用的替代实现是进行状态保存，然后在需要的时候进行状态还原，在这种情况下，反向继承就是一个很好的工具。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> withStateCached = <span class="function">(<span class="params">WrappedComponent</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="keyword">extends</span> <span class="title">WrappedComponent</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> getDerivedStateFromProps(nextProps, state) &#123;</span><br><span class="line">      <span class="comment">// 进行数据的存储等</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">      <span class="comment">// 进行缓存数据的读取</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">super</span>.render();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>在笔者的实际项目中，更多的把高阶组件看作是一个组件工厂或者装饰者模式的应用，例如对一个基础表格元素进行多次的高阶组件的包装，添加分页、工具栏等功能，形成一个个更符合具体业务需求的新组件，达到组件复用的目的。当然，高阶组件也不是全能的，首先其对于业务耦合度较高，更适合封装一些日常业务中常用的组件。其次最重要的弊端是因为内部产生的的 Props 值固定，容易被外部传入值覆盖。如例子中，当外部也传入了一个 name 属性值时，就会根据组件的写法产生不同的覆盖方式而导致错误。<br>由于篇幅限制，这里只粗略地介绍了一些基础使用，要更深入理解可以参考<a href="http://hcysun.me/2018/01/05/%E6%8E%A2%E7%B4%A2Vue%E9%AB%98%E9%98%B6%E7%BB%84%E4%BB%B6/" target="_blank" rel="noopener">这篇文章</a>。</p>
+<h3 id="渲染属性-函数子组件"><a href="#渲染属性-函数子组件" class="headerlink" title="渲染属性/函数子组件"></a>渲染属性/函数子组件</h3><p>为了解决高阶组件存在的问题，一种新的<a href="https://link.zhihu.com/?target=https%3A//reactjs.org/docs/render-props.html" target="_blank" rel="noopener">「Render Props」</a>的方案被提出。该方案提供了一个叫做 render 的函数作为 Props 参数传入，在内部处理完毕后，将所需的组件信息，数据作为 render 的参数传出，从而实现更加灵活的复用逻辑。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> RenderProps = <span class="function">(<span class="params">&#123; render, ...props &#125;</span>) =&gt;</span> render(props, <span class="string">'RenderPropComponent'</span>);</span><br><span class="line"><span class="keyword">const</span> Component = <span class="function"><span class="params">()</span> =&gt;</span> (</span><br><span class="line">    &lt;RenderProps</span><br><span class="line">        render=&#123;(originProps, componentName) =&gt; (<span class="xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span>From &#123;componentName&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>)&#125;</span><br><span class="line">    /&gt;</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">Component</span> /&gt;</span>, document.getElementById('root'));</span></span><br><span class="line"><span class="xml">// =&gt; From RenderPropComponent</span></span><br></pre></td></tr></table></figure></p>
+<p>在该例中，我们通过 render 函数传入了原 Props 和一个新的 name 属性，在实际使用中，重新命名 name 为 componentName，由此避开了高阶组件的弊端。</p>
+<p>由此理念，在 React 中，延伸出函数子组件的概念，将 children 作为函数使用，更加贯彻了一切皆为组件的概念。同时在 <a href="mailto:React@16.3" target="_blank" rel="noopener">React@16.3</a> 版本中，<a href="https://reactjs.org/docs/context.html" target="_blank" rel="noopener">FB 官方的 Context</a> 新 API 的实现也采用了函数子组件的方式。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> RenderProps = <span class="function">(<span class="params">&#123; children, ...props &#125;</span>) =&gt;</span> children(props, name = <span class="string">'RenderPropComponent'</span>);</span><br><span class="line"><span class="keyword">const</span> Component = <span class="function"><span class="params">()</span> =&gt;</span> (<span class="xml"><span class="tag">&lt;<span class="name">RenderProps</span>&gt;</span></span></span><br><span class="line"><span class="xml">    &#123;(originProps, componentName) =&gt; (<span class="tag">&lt;<span class="name">div</span>&gt;</span>From &#123;componentName&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span>)&#125;</span></span><br><span class="line"><span class="xml"><span class="tag">&lt;/<span class="name">RenderProps</span>&gt;</span></span>);</span><br><span class="line"></span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">Component</span> /&gt;</span>, document.getElementById('root'));</span></span><br><span class="line"><span class="xml">// =&gt; From RenderPropComponent</span></span><br></pre></td></tr></table></figure></p>
+<p>而在 <a href="mailto:Vue@2.5" target="_blank" rel="noopener">Vue@2.5</a> 后的版本中，slot-scope 的概念也有点渲染属性的影子。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> RenderProps = &#123;</span><br><span class="line">    template: <span class="string">`&lt;div&gt;&lt;slot v-bind="&#123; name: 'RenderPropComponent' &#125;"&gt;&lt;/slot&gt;&lt;/div&gt;`</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> vm = <span class="keyword">new</span> Vue(&#123;</span><br><span class="line">    el: <span class="string">'#root'</span>,</span><br><span class="line">    components: &#123; <span class="string">'render-props'</span>: RenderProps &#125;,</span><br><span class="line">    template: <span class="string">`</span></span><br><span class="line"><span class="string">      &lt;render-props&gt;</span></span><br><span class="line"><span class="string">        &lt;template slot-scope="&#123; name &#125;"&gt;</span></span><br><span class="line"><span class="string">          &lt;div&gt;From Component&lt;/div&gt;</span></span><br><span class="line"><span class="string">          From &#123;&#123; name &#125;&#125;</span></span><br><span class="line"><span class="string">        &lt;/template&gt;</span></span><br><span class="line"><span class="string">      &lt;/render-props&gt;</span></span><br><span class="line"><span class="string">    `</span></span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// =&gt; From Component</span></span><br><span class="line"><span class="comment">// =&gt; From RenderPropComponent</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="组件注入"><a href="#组件注入" class="headerlink" title="组件注入"></a>组件注入</h3><p>组件注入（Component Injection）的概念有些类似渲染属性，都是传递一个类似 render 的函数属性，区别在于组件注入将该函数作为 React 中的无状态组件使用，而非原始的函数。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> RenderProps = <span class="function">(<span class="params">&#123; Render, ...props &#125;</span>) =&gt;</span> <span class="xml"><span class="tag">&lt;<span class="name">Render</span> &#123;<span class="attr">...props</span>&#125; <span class="attr">name</span>=<span class="string">'RenderPropComponent'</span> /&gt;</span>;</span></span><br><span class="line">const Component = () =&gt; (&lt;RenderProps Render=&#123;(&#123; name &#125;) =&gt; (&lt;div&gt;From &#123;name&#125;&lt;/div&gt;)&#125; /&gt;);</span><br><span class="line"></span><br><span class="line">ReactDOM.render(&lt;Component /&gt;, document.getElementById('root'));</span><br><span class="line">// =&gt; From RenderPropComponent</span><br></pre></td></tr></table></figure></p>
+<p>与渲染属性相比，组件注入能在 devTool 的组件树上直观的展现出内嵌的组件结构。但在另一方面，由于所有属性都被打包成了 props 传出，反而失去了渲染属性的多参数的灵活性。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>组件复用的方式如今可谓是多种多样，笔者认为也并不存在什么所谓的最佳实践，结合具体场景和个人喜好的使用不同方案，远离「Ctrl+C」「Ctrl+V」程序员，才是打造可复用可维护的良好组件、项目的最优选择。</p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://nullptru.github.io">戯れ言</a>
+            <p>原文链接：<a href="https://nullptru.github.io/2019/04/14/漫谈组件复用/">https://nullptru.github.io/2019/04/14/漫谈组件复用/</a>
+            <p>发表日期：<a href="https://nullptru.github.io/2019/04/14/漫谈组件复用/">April 14th 2019, 11:17:41 pm</a>
+            <p>更新日期：<a href="https://nullptru.github.io/2019/04/14/漫谈组件复用/">May 27th 2020, 9:06:07 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2019/04/27/基于Symbol.toPrimitive构建sum的柯里化函数/" title= "基于 Symbol.toPrimitive 构建 sum 的柯里化函数">
+                    <div class="nextTitle">基于 Symbol.toPrimitive 构建 sum 的柯里化函数</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/04/12/客户端渲染-vs-服务端渲染/" title= "客户端渲染 vs 服务端渲染">
+                    <div class="prevTitle">客户端渲染 vs 服务端渲染</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        var disqus_config = function () {
+            this.page.url = 'https://nullptru.github.io/2019/04/14/漫谈组件复用/';
+            this.page.identifier = '/2019/04/14/漫谈组件复用/';
+            this.page.title = '漫谈组件复用';
+        };
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://geass-studio.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:1006755794@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/nullptru" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/wx_qr.png" />
+                </span>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer qq" title=qq>
+                  
+                  <img class="profile-qr" src="/assets/qq_qr.png" />
+                </span>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Mixin-混入模式"><span class="toc-number">1.</span> <span class="toc-text">Mixin 混入模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#高阶组件"><span class="toc-number">2.</span> <span class="toc-text">高阶组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#渲染属性-函数子组件"><span class="toc-number">3.</span> <span class="toc-text">渲染属性/函数子组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#组件注入"><span class="toc-number">4.</span> <span class="toc-text">组件注入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number"></span> <span class="toc-text">总结</span></a>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 15
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/2020/04/27/从0到1实现useAxios/" >从0到1实现useAxios</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/2020/03/20/浅谈微前端/" >浅谈微前端</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/25</span><a class="archive-post-title" href= "/2019/11/25/vue中keep-alive源码解析/" >vue中keep-alive源码解析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/24</span><a class="archive-post-title" href= "/2019/11/24/从0到1实现Promise/" >从0到1实现Promise</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/25</span><a class="archive-post-title" href= "/2019/09/25/AutoFill导致Chrome的compositionend事件不触发/" >AutoFill导致Chrome的compositionend事件不触发</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/10</span><a class="archive-post-title" href= "/2019/08/10/WEB可访问性浅谈/" >Web 可访问性浅谈</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/21</span><a class="archive-post-title" href= "/2019/07/21/React源码Scheduler（三）React的调度算法实现/" >React源码Scheduler（三）React的调度算法实现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/2019/07/13/React 源码Scheduler（二）React的调度流程/" >React 源码Scheduler（二）React的调度流程</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/2019/07/06/React 源码Scheduler（一）浏览器的调度/" >React 源码 Scheduler（一）浏览器的调度</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span><a class="archive-post-title" href= "/2019/07/05/Trie树与不可变数据结构/" >Trie 树与不可变数据结构</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/2019/04/27/基于Symbol.toPrimitive构建sum的柯里化函数/" >基于 Symbol.toPrimitive 构建 sum 的柯里化函数</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/14</span><a class="archive-post-title" href= "/2019/04/14/漫谈组件复用/" >漫谈组件复用</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/12</span><a class="archive-post-title" href= "/2019/04/12/客户端渲染-vs-服务端渲染/" >客户端渲染 vs 服务端渲染</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/2018/06/14/Service-Worker/" >Service Worker</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/10</span><a class="archive-post-title" href= "/2018/04/10/纯前端之LBS隐写/" >纯前端之 LBS 隐写</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="前端"><span class="iconfont-archer">&#xe606;</span>前端</span>
+    
+        <span class="sidebar-tag-name" data-tags="React"><span class="iconfont-archer">&#xe606;</span>React</span>
+    
+        <span class="sidebar-tag-name" data-tags="源码解析"><span class="iconfont-archer">&#xe606;</span>源码解析</span>
+    
+        <span class="sidebar-tag-name" data-tags="规范"><span class="iconfont-archer">&#xe606;</span>规范</span>
+    
+        <span class="sidebar-tag-name" data-tags="react"><span class="iconfont-archer">&#xe606;</span>react</span>
+    
+        <span class="sidebar-tag-name" data-tags="hooks"><span class="iconfont-archer">&#xe606;</span>hooks</span>
+    
+        <span class="sidebar-tag-name" data-tags="函数式"><span class="iconfont-archer">&#xe606;</span>函数式</span>
+    
+        <span class="sidebar-tag-name" data-tags="JavaScript"><span class="iconfont-archer">&#xe606;</span>JavaScript</span>
+    
+        <span class="sidebar-tag-name" data-tags="笔记"><span class="iconfont-archer">&#xe606;</span>笔记</span>
+    
+        <span class="sidebar-tag-name" data-tags="微前端"><span class="iconfont-archer">&#xe606;</span>微前端</span>
+    
+        <span class="sidebar-tag-name" data-tags="数据结构"><span class="iconfont-archer">&#xe606;</span>数据结构</span>
+    
+        <span class="sidebar-tag-name" data-tags="LBS"><span class="iconfont-archer">&#xe606;</span>LBS</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="技术文档"><span class="iconfont-archer">&#xe60a;</span>技术文档</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "戯れ言"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script>if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js?t=1590587668242')
+    .then(function () {console.log('ServiceWorker Register Successfully.')})
+    .catch(function (e) {console.error(e)});
+}
+</script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-20},"mobile":{"show":false},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
+
+

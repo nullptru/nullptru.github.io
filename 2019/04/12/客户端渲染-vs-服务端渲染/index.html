@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+<head><link rel=manifest href=/manifest.json><meta name="generator" content="Hexo 3.9.0"><link rel="manifest" href="/manifest.json">
+    <meta charset="utf-8">
+    <meta name="google-site-verification" content="cZXxPh_zIQVh7W3rVoHr-GAX0S9spUQxoIT0rEbKfrA">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="戯れ言">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="戯れ言">
+    
+    <meta name="keywords" content="Geass,hexo-theme,Geass-blog">
+    
+    <meta name="description" content="Another front-end developer">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>客户端渲染 vs 服务端渲染 · Geass&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-139204686-1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-139204686-1');
+    </script>
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Geass&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">客户端渲染 vs 服务端渲染</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Geass's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            客户端渲染 vs 服务端渲染
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "前端">前端</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">1.6k</span>阅读时长: <span class="post-count reading-time">5 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/04/12</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>在前端页面的渲染这块，近几年来感觉经历了从服务端渲染(多页面)=&gt;客户端渲染(SPA)=&gt;同构渲染的演变，虽然对各自概念大致了解，也在网上粗略看过一些资料，但始终不求甚解。趁此机会做个简单的总结。</p>
+<h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p><img src="https://cloud.githubusercontent.com/assets/948896/25062958/ca1b6618-2209-11e7-99ae-c2a75ad3dabb.png" alt></p>
+<h4 id="客户端渲染"><a href="#客户端渲染" class="headerlink" title="客户端渲染"></a>客户端渲染</h4><p>在浏览器中通过JS直接进行页面的渲染路由跳转等操作，与后端的交互主要为API微服务接口的数据调用。得到数据后在前端进行分析处理和界面生成展现。比较代表性的为<code>React</code>,<code>Vue</code>,<code>Angular</code>三大前端框架的<code>SPA(Single Page Application)</code>应用。</p>
+<h4 id="服务端渲染"><a href="#服务端渲染" class="headerlink" title="服务端渲染"></a>服务端渲染</h4><p>后端不仅仅进行数据的获取处理操作，同时也负责页面的生成，最终传到客户端(浏览器)的是生成的包含数据的页面。客户端所需要做的仅仅是html页面的展现和之后的DOM事件处理。代表为传统的<code>JSP</code>,<code>PHP</code>,<code>ASP</code>应用。</p>
+<h4 id="同构"><a href="#同构" class="headerlink" title="同构"></a>同构</h4><p>前后端共用一套JS代码，采用不同的构建方式。通过Node服务器进行页面的首屏生成。在我的理解上，有点中间件的意思。</p>
+<h3 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h3><h4 id="服务端渲染-1"><a href="#服务端渲染-1" class="headerlink" title="服务端渲染"></a>服务端渲染</h4><ul>
+<li>优点<ol>
+<li>优秀的SEO</li>
+<li>首屏加载快</li>
+</ol>
+</li>
+<li>缺点<ol>
+<li>负载大：由于渲染任务都交由服务端进行，在高并发的情况下，对于服务端负载压力大，同时丧失了浏览器端作为一个天然分布式系统的优势。</li>
+<li>复用性能差：因为返回的是整个页面，对于每个路由都要重新进行页面刷新，复用性能 上不友好。</li>
+<li>前后端耦合严重，前端开发依赖于后端，开发形式上不友好</li>
+</ol>
+</li>
+</ul>
+<h4 id="前端渲染"><a href="#前端渲染" class="headerlink" title="前端渲染"></a>前端渲染</h4><ul>
+<li>优点<ol>
+<li>天然的浏览器分布式环境</li>
+<li>组件复用度高，还可以通过懒加载等进行性能的进一步优化</li>
+<li>除首屏外性能响应快速</li>
+<li>WEB/MOBILE多端渲染</li>
+<li>前后端分离开发</li>
+</ol>
+</li>
+<li>缺点<ol>
+<li>首屏性能差：由于页面渲染、三方包等逻辑都置于一个JS文件中，首屏加载会导致一定时间的白屏现象。</li>
+<li>浏览器SEO：由于现阶段大多搜索引擎采用的爬虫算法是直接抓取页面代码分析，而SPA应用只有一个入口文件而没实质内容，SEO性能差。</li>
+</ol>
+</li>
+</ul>
+<h4 id="同构-1"><a href="#同构-1" class="headerlink" title="同构"></a>同构</h4><ul>
+<li>优点<ol>
+<li>兼顾前端渲染的大部分优点和后端渲染SEO和首屏加载的优点</li>
+</ol>
+</li>
+<li>缺点<ol>
+<li>需要额外的开发构建成本</li>
+<li>对服务器有一定负载</li>
+</ol>
+</li>
+</ul>
+<h3 id="细化"><a href="#细化" class="headerlink" title="细化"></a>细化</h3><p>前端，不管采用什么渲染方式，最终都是为了增强用户体验这个相同的目的。以目前的趋势，客户端渲染和同构已为主流。对于各自的缺点，社区均涌现出大量优秀的解决方案。</p>
+<h4 id="首屏加载"><a href="#首屏加载" class="headerlink" title="首屏加载"></a>首屏加载</h4><p>我们说过前端渲染一个重要的不足就是首屏加载性能。究其原因是因为渲染逻辑都在浏览器端，而在开始渲染前，浏览器需要预先加载完打包的JS文件，因此出现白屏的现象。对此，社区一般采用两种方式解决。</p>
+<ul>
+<li>代码分割</li>
+</ul>
+<p>代码分割解决方案的原理是因为首屏展现内容有限，所以我们没必要将所有内容都预先加载，仅需要加载必要资源，在访问其他页面的时候再动态加载相应页面逻辑，便能通过压缩减少首屏加载JS文件大小从质上解决首屏加载慢/白屏的问题。</p>
+<ul>
+<li>预展示</li>
+</ul>
+<p>预展示从另一个角度对首屏加载提供解决办法。首屏问题带来的用户体验差原因是打开页面时用户会有一定的白屏空窗期，那我让用户知道这段时间网页在进行什么操作不就好了？因此，采用预先展示一个Loading界面或者Skeleton Screen的方式增强用户的交互性以避免用户体验中的断层和页面撕裂感，在真实页面加载完成后取消过渡层，达到一个顺滑过渡的效果。<br><img src="https://camo.githubusercontent.com/f3ffed6cb07455f16cf492517537abd05985aac2/68747470733a2f2f696d672e616c6963646e2e636f6d2f7466732f5442314a6a6b5151705858585858536158585858585858585858582d323535342d313430302e706e67" alt><br><img src="https://camo.githubusercontent.com/58cf0fd1fb24d213d9084c4ed5c4caaa611502c2/68747470733a2f2f696d672e616c6963646e2e636f6d2f7466732f54423169614d4d51705858585858766158585858585858585858582d323535342d313335342e706e67" alt></p>
+<h4 id="SEO"><a href="#SEO" class="headerlink" title="SEO"></a>SEO</h4><p>在SEO这个问题上，前端渲染的确处于劣势。虽然Chrome和部分浏览器开始对页面进行JS的执行后抓取，但我们并不能短期内抱有太大期望。因为前端渲染的页面源文件只有几个加载项。如果要考虑SEO，就我了解的大致有以下几点：</p>
+<ul>
+<li>通过<code>meta</code>的元属性进行关键字的SEO</li>
+<li>提供一套静态HTML模版供浏览器抓取用以SEO</li>
+</ul>
+<h4 id="同构-2"><a href="#同构-2" class="headerlink" title="同构"></a>同构</h4><p>同构作为一个解决前端渲染缺点的技术，主要缺点在于会增加服务器的负载，对此一般推荐对于首屏和个别页面进行SSR服务端的渲染，此外仍保持应用为SPA，充分利用浏览器特点，达到最优性能。这方面各主流框架都提供了相应解决方案，React推荐使用<a href="https://github.com/zeit/next.js" target="_blank" rel="noopener">Next.js</a></p>
+<h3 id="渲染方案的选择"><a href="#渲染方案的选择" class="headerlink" title="渲染方案的选择"></a>渲染方案的选择</h3><p>通过对三种渲染方案的分析，我们大致了解了相应的优缺点。那么在实际项目中应该如何选择。对此我认为我们可以根据实际项目的类型和特征分析。</p>
+<p>如果是公司内部或者注重交互性，对于内容和SEO不是要求特别高的应用，推荐采用SPA前端渲染的方式。</p>
+<p>如果是内容展示型应用，例如博客、知乎、微博这些，SEO就显得尤为重要，这时候SEO带来的收益就超过了额外的开发成本，因此采用SSR同构方案，既能保持SPA的强交互性，又能保证SEO。当然采用传统服务端渲染也是可以的。</p>
+<h3 id="参考资料："><a href="#参考资料：" class="headerlink" title="参考资料："></a>参考资料：</h3><ol>
+<li><a href="https://github.com/camsong/blog/issues/8" target="_blank" rel="noopener">精读前后端渲染之争</a></li>
+<li><a href="https://juejin.im/post/5a0536346fb9a044fe45d33a" target="_blank" rel="noopener">服务端渲染与 Universal React App</a></li>
+<li><a href="https://medium.freecodecamp.org/heres-why-client-side-rendering-won-46a349fadb52" target="_blank" rel="noopener">Here’s Why Client-side Rendering Won</a></li>
+<li><a href="https://www.zhihu.com/question/26603809" target="_blank" rel="noopener">知乎专栏使用angular是怎么做到seo的?</a></li>
+<li><a href="http://www.alloyteam.com/2017/01/react-from-scratch-server-render/" target="_blank" rel="noopener">从零开始React服务器渲染</a></li>
+<li><a href="https://github.com/zeit/next.js" target="_blank" rel="noopener">Next.js: Framework for server-rendered or statically-exported React apps</a></li>
+</ol>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="https://nullptru.github.io">戯れ言</a>
+            <p>原文链接：<a href="https://nullptru.github.io/2019/04/12/客户端渲染-vs-服务端渲染/">https://nullptru.github.io/2019/04/12/客户端渲染-vs-服务端渲染/</a>
+            <p>发表日期：<a href="https://nullptru.github.io/2019/04/12/客户端渲染-vs-服务端渲染/">April 12th 2019, 11:48:21 pm</a>
+            <p>更新日期：<a href="https://nullptru.github.io/2019/04/12/客户端渲染-vs-服务端渲染/">May 27th 2020, 9:06:07 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2019/04/14/漫谈组件复用/" title= "漫谈组件复用">
+                    <div class="nextTitle">漫谈组件复用</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/06/14/Service-Worker/" title= "Service Worker">
+                    <div class="prevTitle">Service Worker</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        var disqus_config = function () {
+            this.page.url = 'https://nullptru.github.io/2019/04/12/客户端渲染-vs-服务端渲染/';
+            this.page.identifier = '/2019/04/12/客户端渲染-vs-服务端渲染/';
+            this.page.title = '客户端渲染 vs 服务端渲染';
+        };
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://geass-studio.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:1006755794@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/nullptru" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/wx_qr.png" />
+                </span>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer qq" title=qq>
+                  
+                  <img class="profile-qr" src="/assets/qq_qr.png" />
+                </span>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#概念"><span class="toc-number">1.</span> <span class="toc-text">概念</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#客户端渲染"><span class="toc-number">1.1.</span> <span class="toc-text">客户端渲染</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#服务端渲染"><span class="toc-number">1.2.</span> <span class="toc-text">服务端渲染</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#同构"><span class="toc-number">1.3.</span> <span class="toc-text">同构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#优缺点"><span class="toc-number">2.</span> <span class="toc-text">优缺点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#服务端渲染-1"><span class="toc-number">2.1.</span> <span class="toc-text">服务端渲染</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#前端渲染"><span class="toc-number">2.2.</span> <span class="toc-text">前端渲染</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#同构-1"><span class="toc-number">2.3.</span> <span class="toc-text">同构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#细化"><span class="toc-number">3.</span> <span class="toc-text">细化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#首屏加载"><span class="toc-number">3.1.</span> <span class="toc-text">首屏加载</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SEO"><span class="toc-number">3.2.</span> <span class="toc-text">SEO</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#同构-2"><span class="toc-number">3.3.</span> <span class="toc-text">同构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#渲染方案的选择"><span class="toc-number">4.</span> <span class="toc-text">渲染方案的选择</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#参考资料："><span class="toc-number">5.</span> <span class="toc-text">参考资料：</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 15
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2020 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/2020/04/27/从0到1实现useAxios/" >从0到1实现useAxios</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/20</span><a class="archive-post-title" href= "/2020/03/20/浅谈微前端/" >浅谈微前端</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/25</span><a class="archive-post-title" href= "/2019/11/25/vue中keep-alive源码解析/" >vue中keep-alive源码解析</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/24</span><a class="archive-post-title" href= "/2019/11/24/从0到1实现Promise/" >从0到1实现Promise</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/25</span><a class="archive-post-title" href= "/2019/09/25/AutoFill导致Chrome的compositionend事件不触发/" >AutoFill导致Chrome的compositionend事件不触发</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/10</span><a class="archive-post-title" href= "/2019/08/10/WEB可访问性浅谈/" >Web 可访问性浅谈</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/21</span><a class="archive-post-title" href= "/2019/07/21/React源码Scheduler（三）React的调度算法实现/" >React源码Scheduler（三）React的调度算法实现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/13</span><a class="archive-post-title" href= "/2019/07/13/React 源码Scheduler（二）React的调度流程/" >React 源码Scheduler（二）React的调度流程</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/2019/07/06/React 源码Scheduler（一）浏览器的调度/" >React 源码 Scheduler（一）浏览器的调度</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span><a class="archive-post-title" href= "/2019/07/05/Trie树与不可变数据结构/" >Trie 树与不可变数据结构</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/27</span><a class="archive-post-title" href= "/2019/04/27/基于Symbol.toPrimitive构建sum的柯里化函数/" >基于 Symbol.toPrimitive 构建 sum 的柯里化函数</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/14</span><a class="archive-post-title" href= "/2019/04/14/漫谈组件复用/" >漫谈组件复用</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/12</span><a class="archive-post-title" href= "/2019/04/12/客户端渲染-vs-服务端渲染/" >客户端渲染 vs 服务端渲染</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/14</span><a class="archive-post-title" href= "/2018/06/14/Service-Worker/" >Service Worker</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/10</span><a class="archive-post-title" href= "/2018/04/10/纯前端之LBS隐写/" >纯前端之 LBS 隐写</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="前端"><span class="iconfont-archer">&#xe606;</span>前端</span>
+    
+        <span class="sidebar-tag-name" data-tags="React"><span class="iconfont-archer">&#xe606;</span>React</span>
+    
+        <span class="sidebar-tag-name" data-tags="源码解析"><span class="iconfont-archer">&#xe606;</span>源码解析</span>
+    
+        <span class="sidebar-tag-name" data-tags="规范"><span class="iconfont-archer">&#xe606;</span>规范</span>
+    
+        <span class="sidebar-tag-name" data-tags="react"><span class="iconfont-archer">&#xe606;</span>react</span>
+    
+        <span class="sidebar-tag-name" data-tags="hooks"><span class="iconfont-archer">&#xe606;</span>hooks</span>
+    
+        <span class="sidebar-tag-name" data-tags="函数式"><span class="iconfont-archer">&#xe606;</span>函数式</span>
+    
+        <span class="sidebar-tag-name" data-tags="JavaScript"><span class="iconfont-archer">&#xe606;</span>JavaScript</span>
+    
+        <span class="sidebar-tag-name" data-tags="笔记"><span class="iconfont-archer">&#xe606;</span>笔记</span>
+    
+        <span class="sidebar-tag-name" data-tags="微前端"><span class="iconfont-archer">&#xe606;</span>微前端</span>
+    
+        <span class="sidebar-tag-name" data-tags="数据结构"><span class="iconfont-archer">&#xe606;</span>数据结构</span>
+    
+        <span class="sidebar-tag-name" data-tags="LBS"><span class="iconfont-archer">&#xe606;</span>LBS</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="技术文档"><span class="iconfont-archer">&#xe60a;</span>技术文档</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "戯れ言"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script>if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js?t=1590587668242')
+    .then(function () {console.log('ServiceWorker Register Successfully.')})
+    .catch(function (e) {console.error(e)});
+}
+</script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-20},"mobile":{"show":false},"react":{"opacityDefault":0.7,"opacityOnHover":0.2},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
+
+
